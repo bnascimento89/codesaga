@@ -1,6 +1,6 @@
 require 'csv'
+require_relative 'task.rb'
 
-tarefa = {}
 tarefas = []
 def menu()
   puts '[1] Inserir uma tarefa'
@@ -17,7 +17,8 @@ def menu()
 end
 csv = CSV.parse(File.read('/Users/bnascimento/workspace/Pre_Curso/task.csv'), headers: true, encoding: "bom|utf-8" , col_sep: ';')
 csv.each do |row|
-  tarefa = {tarefa: row['task'], status: row['status']}
+  tarefa = Task.new(row['task'], row['status'])
+  puts tarefa.to_s
   tarefas << tarefa
 end
 puts "Bem-vindo ao Task List! Escolha uma opção no menu: \n"
@@ -26,16 +27,15 @@ opcao = menu()
 while opcao != 5 do
   if opcao == 1
     print 'Digite sua tarefa: '
-    tarefa = {tarefa: gets.chomp(), status: false}
+    tarefa = Task.new(gets.chomp())
     tarefas << tarefa
-    puts
-    puts "Tarefa cadastrada: ' #{tarefas.last[:tarefa]} - Realizada: #{tarefas.last[:status]} "
+    puts "Tarefa cadastrada: ' #{tarefa.to_s}"
     opcao = menu()
     system('clear')
   elsif opcao == 2
-    puts
     tarefas.each_with_index do |item, index|
-      puts "##{(index + 1)} - Tarefa: #{item[:tarefa]} - Status: #{item[:status]}"
+      tarefa = item
+      puts tarefa.to_s
     end
     opcao = menu()
     system('clear')
@@ -44,8 +44,8 @@ while opcao != 5 do
     busca = gets.chomp
     termo_encontrado = []
     tarefas.each do |tarefa|
-      if busca.downcase == tarefa[:tarefa].downcase
-        termo_encontrado << tarefa[:tarefa]
+      if busca.downcase == tarefa.description.downcase
+        termo_encontrado << tarefa.description
       end
     end
     if termo_encontrado.length > 0
@@ -57,14 +57,14 @@ while opcao != 5 do
     system('clear')
   elsif opcao == 4
     tarefas.each_with_index do |item, index|
-      puts "##{(index + 1)} - Tarefa:#{item[:tarefa]} Status: #{item[:status]}"
+      puts "##{(index + 1)} - Tarefa:#{item.to_s}"
     end
     print 'Escolha uma tarefa: '
     escolha = gets
     encontrada = false
     tarefas.each_with_index do |item, index|
-      if escolha.to_i == index + 1 || escolha.chomp.downcase == item[:tarefa].downcase
-        tarefas[index][:status] = true
+      if escolha.to_i == index + 1 || escolha.chomp.downcase == item.description.downcase
+        item.status = true
         puts "Tarefa alterada para realizada!"
         encontrada = true
       end
@@ -84,9 +84,9 @@ if opcao == 5
   File.open('task.csv', 'w') do |file|
     file.write("task;status\n")
     tarefas.each_with_index do |item, index|
-      tarefa = "#{item[:tarefa]}; #{item[:status]}\n"
-      puts tarefa
-      file.write(tarefa.to_s)
+      tarefa = item
+      puts tarefa.to_s
+      file.write("#{tarefa.description};#{tarefa.status}\n")
     end
   end
 end
