@@ -1,92 +1,62 @@
 require 'csv'
 require_relative 'task.rb'
+require_relative 'task_printer.rb'
 
-tarefas = []
+tasks = []
 def menu()
-  puts '[1] Inserir uma tarefa'
-  puts '[2] Ver todas as tarefas'
-  puts '[3] Pesquisar'
-  puts '[4] Alterar tarefa para realizada'
-  puts '[5] Sair'
+  puts '[1] Insert task'
+  puts '[2] See tasks'
+  puts '[3] Search'
+  puts '[4] Change to done'
+  puts '[5] Exit'
   puts
-  print 'Opção escolhida: '
+  print 'Option choosed: '
 
-  opcao = gets.to_i
+  option = gets.to_i
 
-  opcao.to_i
+  option.to_i
 end
-csv = CSV.parse(File.read('/Users/bnascimento/workspace/Pre_Curso/task.csv'), headers: true, encoding: "bom|utf-8" , col_sep: ';')
-csv.each do |row|
-  tarefa = Task.new(row['task'], row['status'])
-  puts tarefa.to_s
-  tarefas << tarefa
-end
-puts "Bem-vindo ao Task List! Escolha uma opção no menu: \n"
-opcao = menu()
+tasks = TaskPrinter.load_tasks
+puts "Welcome to Task List! Choose one option: \n"
+option = menu()
 
-while opcao != 5 do
-  if opcao == 1
-    print 'Digite sua tarefa: '
-    tarefa = Task.new(gets.chomp())
-    tarefas << tarefa
-    puts "Tarefa cadastrada: ' #{tarefa.to_s}"
-    opcao = menu()
+while option != 5 do
+  if option == 1
+    print 'Type your tasks: '
+    task = Task.new(gets.chomp())
+    tasks << task
+    puts "task registred: ' #{task.to_s}"
+    option = menu()
     system('clear')
-  elsif opcao == 2
-    tarefas.each_with_index do |item, index|
-      tarefa = item
-      puts tarefa.to_s
-    end
-    opcao = menu()
+  elsif option == 2
+    TaskPrinter.list_tasks(tasks)
+    option = menu()
     system('clear')
-  elsif opcao == 3
-    print 'Termo de busca: '
+  elsif option == 3
+    print 'Search term: '
     busca = gets.chomp
-    termo_encontrado = []
-    tarefas.each do |tarefa|
-      if busca.downcase == tarefa.description.downcase
-        termo_encontrado << tarefa.description
-      end
-    end
-    if termo_encontrado.length > 0
-      puts "Tarefa encontrada: #{termo_encontrado.last}"
-    else
-      puts "Não foi encontrado resultado para busca realizada"
-    end
-    opcao = menu()
+    task = TaskPrinter.find_task(tasks, busca)
+    TaskPrinter.print_task(task)
+    option = menu()
     system('clear')
-  elsif opcao == 4
-    tarefas.each_with_index do |item, index|
-      puts "##{(index + 1)} - Tarefa:#{item.to_s}"
+  elsif option == 4
+    TaskPrinter.list_tasks(tasks)
+    print 'Choose a tasks: '
+    term = gets.chomp
+    task = TaskPrinter.find_task(tasks, term)
+    if task.class == Task
+      task.mark_as_done
+    else
+      puts task
     end
-    print 'Escolha uma tarefa: '
-    escolha = gets
-    encontrada = false
-    tarefas.each_with_index do |item, index|
-      if escolha.to_i == index + 1 || escolha.chomp.downcase == item.description.downcase
-        item.status = true
-        puts "Tarefa alterada para realizada!"
-        encontrada = true
-      end
-    end
-    if encontrada == false
-      puts "Tarefa não encontrada"
-    end
-    opcao = menu()
+    option = menu()
     system('clear')
   else
-    puts 'Opção inválida'
-    opcao = menu()
+    puts 'Invalid option'
+    option = menu()
     system('clear')
   end
 end
-if opcao == 5
-  File.open('task.csv', 'w') do |file|
-    file.write("task;status\n")
-    tarefas.each_with_index do |item, index|
-      tarefa = item
-      puts tarefa.to_s
-      file.write("#{tarefa.description};#{tarefa.status}\n")
-    end
-  end
+if option == 5
+  TaskPrinter.save_tasks(tasks)
 end
