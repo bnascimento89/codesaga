@@ -1,4 +1,7 @@
-task;status
-bruno;false
-mari;true
-nanda;false
+task;status;deadline
+bruno;true;
+mari;false;
+nanda;false;
+Pedro;true;31/01/2019
+Thiago;false;
+Ricardo;true;29/01/2019

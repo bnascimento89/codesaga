@@ -23,9 +23,9 @@ class TaskPrinter
 
   def self.save_tasks(tasks)
     File.open('task.csv', 'w') do |file|
-      file.write("task;status\n")
+      file.write("task;status;deadline\n")
       tasks.each_with_index do |item, index|
-        file.write("#{item.description};#{item.status}\n")
+        file.write("#{item.description};#{item.status};#{item.deadline}\n")
       end
     end
   end
@@ -34,7 +34,7 @@ class TaskPrinter
     tasks = []
     csv = CSV.parse(File.read('/Users/bnascimento/workspace/exemplo_git/Pre_Curso/task.csv'), headers: true, encoding: "bom|utf-8" , col_sep: ';')
     csv.each do |row|
-      task = Task.new(row['task'], row['status'])
+      task = TaskWithDeadline.new(row['task'], row['status'], row['deadline'])
       print_task(task)
       tasks << task
     end
